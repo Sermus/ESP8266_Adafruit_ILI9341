@@ -17,7 +17,11 @@
 #define _ADAFRUIT_ILI9341H_
 
 #include "Adafruit_GFX_AS.h"
-
+extern "C"
+{
+#include <gpio.h>
+#include "hspi.h"
+}
 #define ILI9341_TFTWIDTH  240
 #define ILI9341_TFTHEIGHT 320
 
@@ -88,6 +92,13 @@
 #define ILI9341_YELLOW  0xFFE0  
 #define ILI9341_WHITE   0xFFFF
 
+#define TFT_DC_DATA		GPIO_OUTPUT_SET(2, 1)
+#define TFT_DC_COMMAND	GPIO_OUTPUT_SET(2, 0)
+#define TFT_DC_INIT 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2); TFT_DC_DATA
+
+#define TFT_RST_ACTIVE		GPIO_OUTPUT_SET(4, 0)
+#define TFT_RST_DEACTIVE 	GPIO_OUTPUT_SET(4, 1)
+#define TFT_RST_INIT		PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO4_U, FUNC_GPIO4); TFT_RST_DEACTIVE
 
 class Adafruit_ILI9341 : public Adafruit_GFX_AS {
 
@@ -109,12 +120,11 @@ class Adafruit_ILI9341 : public Adafruit_GFX_AS {
 
  private:
   uint8_t  tabcolor;
-  void pushColor(uint16_t color);
-  void pushColor(uint16_t color, uint32_t numRepeat);
-  void transmitCmdData(uint8_t cmd, const uint8_t * data, uint8_t numDataByte);
-  void transmitData(const uint8_t *data, uint8_t numByte, uint32_t numRepeat);
-  void transmitCmd(uint8_t cmd);
-  uint8_t readRegister(uint8_t cmd, uint8_t numParameter);
+  void transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte);
+  inline void transmitData(uint16_t data) {hspi_send_uint16(data);}
+  inline void transmitCmdData(uint8_t cmd, uint32_t data) {TFT_DC_COMMAND; hspi_send_uint8(cmd); TFT_DC_DATA; hspi_send_uint32(data);}
+  inline void transmitData(uint16_t data, uint32_t repeats){hspi_send_uint16_r(data, repeats);}
+  inline void transmitCmd(uint8_t cmd){TFT_DC_COMMAND; hspi_send_uint8(cmd);TFT_DC_DATA;}
 };
 
 #endif

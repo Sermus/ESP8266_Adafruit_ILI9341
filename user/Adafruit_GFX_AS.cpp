@@ -54,6 +54,7 @@ extern "C" {
 #endif
 
 #define abs(x) ((x)<0 ? -(x) : (x))
+extern "C" int ets_uart_printf(const char *fmt, ...);
 
 ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 		  WIDTH(w), HEIGHT(h)
@@ -63,6 +64,7 @@ ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 	rotation  = 0;
 	textcolor = textbgcolor = 0xFFFF;
 	wrap      = true;
+	ets_uart_printf("Adafruit_GFX_AS::Adafruit_GFX_AS()");
 }
 
 // Draw a circle outline
@@ -245,8 +247,11 @@ void Adafruit_GFX_AS::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	}
 }
 
+extern "C" int ets_uart_printf(const char *fmt, ...);
+
 void Adafruit_GFX_AS::fillScreen(uint16_t color) {
 	fillRect(0, 0, _width, _height, color);
+	ets_uart_printf("%d x %d", _width, _height);
 }
 
 // Draw a rounded rectangle

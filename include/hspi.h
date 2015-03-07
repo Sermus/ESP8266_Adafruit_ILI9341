@@ -19,8 +19,10 @@
 #define MAX_SIZE_BUFFER	32
 
 extern void hspi_init(void);
-extern void hspi_TxRx(uint8_t * data, uint8_t numberByte);
-extern void hspi_Tx(const uint8_t * data, uint8_t numberByte, uint32_t numberRepeat);
-
+extern void hspi_send_uint8(const uint8_t data);
+extern void hspi_send_uint16(const uint16_t data);
+extern void hspi_send_uint16_r(const uint16_t data, uint32_t repeats);
+extern void hspi_send_uint32(const uint32_t data);
+extern void hspi_send_data(const uint8_t * data, uint8_t datasize);
 
 #endif /* INCLUDE_HSPI_H_ */

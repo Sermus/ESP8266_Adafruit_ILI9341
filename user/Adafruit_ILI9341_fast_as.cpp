@@ -20,72 +20,28 @@ extern "C"{
 #include <ets_sys.h>
 #include <os_type.h>
 #include <osapi.h>
-#include <gpio.h>
 #include "hspi.h"
 #include "espmissingincludes.h"
 }
 
-#define TFT_CS_ACTIVE	GPIO_OUTPUT_SET(4, 0)
-#define TFT_CS_DEACTIVE GPIO_OUTPUT_SET(4, 1)
-#define TFT_CS_INIT		PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO4_U, FUNC_GPIO4); TFT_CS_DEACTIVE
-
-#define TFT_DC_DATA		GPIO_OUTPUT_SET(2, 1)
-#define TFT_DC_COMMAND	GPIO_OUTPUT_SET(2, 0)
-#define TFT_DC_INIT 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2); TFT_DC_DATA
-
-#define TFT_RST_ACTIVE		GPIO_OUTPUT_SET(0, 0)
-#define TFT_RST_DEACTIVE 	GPIO_OUTPUT_SET(0, 1)
-#define TFT_RST_INIT		PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0); TFT_RST_DEACTIVE
-
+extern "C" int ets_uart_printf(const char *fmt, ...);
 
 Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
 	tabcolor = 0;
+	ets_uart_printf("Adafruit_ILI9341::Adafruit_ILI9341()");
 }
 
-void Adafruit_ILI9341::transmitCmdData(uint8_t cmd, const uint8_t * data, uint8_t numDataByte)
+void Adafruit_ILI9341::transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte)
 {
-	TFT_CS_ACTIVE;
 	TFT_DC_COMMAND;
-	hspi_TxRx(&cmd, 1);
-	if (numDataByte > 0)
-	{
-		TFT_DC_DATA;
-		hspi_Tx(data, numDataByte, 1);
-	}
-	TFT_CS_DEACTIVE;
-}
-
-void Adafruit_ILI9341::transmitData(const uint8_t *data, uint8_t numByte, uint32_t numRepeat)
-{
+	hspi_send_uint8(cmd);
 	TFT_DC_DATA;
-	TFT_CS_ACTIVE;
-	hspi_Tx(data, numByte, numRepeat);
-	TFT_CS_DEACTIVE;
+	hspi_send_data(data, numDataByte);
 }
 
-void Adafruit_ILI9341::transmitCmd(uint8_t cmd)
-{
-	TFT_CS_ACTIVE;
-	TFT_DC_COMMAND;
-	hspi_TxRx(&cmd, 1);
-	TFT_CS_DEACTIVE;
-}
-
-
-uint8_t Adafruit_ILI9341::readRegister(uint8_t cmd, uint8_t numParameter)
-{
-	uint8_t data = 0;
-	data = 0x10 + numParameter;
-	transmitCmdData(0xD9, &data, 1); // secret command and 0x11 is the first Parameter
-	transmitCmdData(cmd, &data, 1);
-	return data;
-}
-
-void Adafruit_ILI9341::begin(void) {
+ICACHE_FLASH_ATTR void Adafruit_ILI9341::begin(void) {
 	//Set communication using HW SPI Port
-
 	hspi_init();
-	TFT_CS_INIT;
 	TFT_DC_INIT;
 	TFT_RST_INIT;
 
@@ -201,26 +157,13 @@ void Adafruit_ILI9341::begin(void) {
 	transmitCmd(0x2c);
 }
 
+#define MAKEWORD(b1, b2, b3, b4) (uint32_t(b1) | ((b2) << 8) | ((b3) << 16) | ((b4) << 24))
 
 void Adafruit_ILI9341::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1,
 		uint16_t y1) {
-
-	uint8_t datat[4] = {x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF};
-	transmitCmdData(ILI9341_CASET, datat, 4);
-	uint8_t datap[4] = {y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF};
-	transmitCmdData(ILI9341_PASET, datap, 4);
+	transmitCmdData(ILI9341_CASET, MAKEWORD(x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF));
+	transmitCmdData(ILI9341_PASET, MAKEWORD(y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF));
 	transmitCmd(ILI9341_RAMWR); // write to RAM
-}
-
-
-void Adafruit_ILI9341::pushColor(uint16_t color) {
-	const uint8_t data[2] = {color >> 8, color};
-	transmitData(data, 1, 1);
-}
-
-void Adafruit_ILI9341::pushColor(uint16_t color, uint32_t numRepeat) {
-	const uint8_t data[2] = {color >> 8, color};
-	transmitData(data, 1, numRepeat);
 }
 
 void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
@@ -228,7 +171,7 @@ void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
 	if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
 
 	setAddrWindow(x,y,x+1,y+1);
-	pushColor(color);
+	transmitData(color);
 }
 
 
@@ -242,7 +185,7 @@ void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
 		h = _height-y;
 
 	setAddrWindow(x, y, x, y+h-1);
-	pushColor(color, h);
+	transmitData(color, h);
 }
 
 void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
@@ -252,7 +195,7 @@ void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
 	if((x >= _width) || (y >= _height)) return;
 	if((x+w-1) >= _width)  w = _width-x;
 	setAddrWindow(x, y, x+w-1, y);
-	pushColor(color, w);
+	transmitData(color, w);
 }
 
 void Adafruit_ILI9341::fillScreen(uint16_t color) {
@@ -269,7 +212,7 @@ void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	if((y + h - 1) >= _height) h = _height - y;
 
 	setAddrWindow(x, y, x+w-1, y+h-1);
-	pushColor(color, h * w);
+	transmitData(color, h*w);
 }
 
 
