@@ -18,7 +18,7 @@ SDK_BASE	?= c:/Espressif/ESP8266_SDK
 # esptool path and port
 SDK_TOOLS	?= c:/Espressif/utils
 ESPTOOL		?= $(SDK_TOOLS)/esptool.exe
-ESPPORT		?= COM2
+ESPPORT		?= COM11
 
 # BOOT = none
 # BOOT = old - boot_v1.1
