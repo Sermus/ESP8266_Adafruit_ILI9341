@@ -68,7 +68,7 @@ ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 }
 
 // Draw a circle outline
-void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16_t r,
+ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16_t r,
 		uint16_t color) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
@@ -102,7 +102,7 @@ void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16_t r,
 	}
 }
 
-void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0,
+ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0,
 		int16_t r, uint8_t cornername, uint16_t color) {
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
@@ -138,14 +138,14 @@ void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0,
 	}
 }
 
-void Adafruit_GFX_AS::fillCircle(int16_t x0, int16_t y0, int16_t r,
+ICACHE_FLASH_ATTR void Adafruit_GFX_AS::fillCircle(int16_t x0, int16_t y0, int16_t r,
 		uint16_t color) {
 	drawFastVLine(x0, y0-r, 2*r+1, color);
 	fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 // Used to do circles and roundrects
-void Adafruit_GFX_AS::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
+ICACHE_FLASH_ATTR void Adafruit_GFX_AS::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
 		uint8_t cornername, int16_t delta, uint16_t color) {
 
 	int16_t f     = 1 - r;
@@ -434,7 +434,7 @@ ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawQuad(int16_t x, int16_t y, uint16_t 
  ** Function name:           drawUnicode
  ** Descriptions:            draw a unicode
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x, uint16_t y, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x, uint16_t y, uint8_t size)
 {
 
 	if (size) uniCode -= 32;
@@ -559,7 +559,7 @@ int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x, uint16_t y, uint8
  ** Function name:           drawNumber unsigned with size
  ** Descriptions:            drawNumber
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, uint16_t poY, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, uint16_t poY, uint8_t size)
 {
 	char tmp[10];
 	if (long_num < 0) snprintf(tmp, sizeof(tmp), "%d", long_num);
@@ -572,7 +572,7 @@ int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, uint16_t poY, uint8_
  ** Function name:           drawChar
  ** Descriptions:            draw char
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, uint8_t size)
 {
 	return drawUnicode(c, x, y, size);
 }
@@ -581,7 +581,7 @@ int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, uint8_t size)
  ** Function name:           drawString
  ** Descriptions:            draw string
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawString(const char *string, uint16_t poX, uint16_t poY, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawString(const char *string, uint16_t poX, uint16_t poY, uint8_t size)
 {
 	uint16_t sumX = 0;
 
@@ -605,7 +605,7 @@ int Adafruit_GFX_AS::drawString(const char *string, uint16_t poX, uint16_t poY, 
  ** Function name:           drawCentreString
  ** Descriptions:            draw string across centre
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawCentreString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
 {
 	uint16_t sumX = 0;
 	uint16_t len = 0;
@@ -659,7 +659,7 @@ int Adafruit_GFX_AS::drawCentreString(const char *string, uint16_t dX, uint16_t 
  ** Function name:           drawRightString
  ** Descriptions:            draw string right justified
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawRightString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawRightString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
 {
 	int sumX = 0;
 	int len = 0;
@@ -712,7 +712,7 @@ int Adafruit_GFX_AS::drawRightString(const char *string, uint16_t dX, uint16_t p
  ** Function name:           drawFloat
  ** Descriptions:            drawFloat
  ***************************************************************************************/
-int Adafruit_GFX_AS::drawFloat(float floatNumber, uint8_t decimal, uint16_t poX, uint16_t poY, uint8_t size)
+ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawFloat(float floatNumber, uint8_t decimal, uint16_t poX, uint16_t poY, uint8_t size)
 {
 	unsigned long temp=0;
 	float decy=0.0;

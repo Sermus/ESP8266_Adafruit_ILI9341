@@ -9,7 +9,7 @@
 #include <mem.h>
 #include "driver/uart.h"
 
-#define DELAY_TIMER 	10 // Delay timer in milliseconds
+#define DELAY_TIMER 	40 // Delay timer in milliseconds
 #define UPDATE_SCREEN  0
 #define TEST_QUEUE_LEN  4
 

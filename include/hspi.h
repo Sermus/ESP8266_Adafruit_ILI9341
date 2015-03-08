@@ -16,9 +16,9 @@
 
 #define SPI         0
 #define HSPI        1
-#define MAX_SIZE_BUFFER	32
 
 extern void hspi_init(void);
+extern void hspi_wait_ready(void);
 extern void hspi_send_uint8(const uint8_t data);
 extern void hspi_send_uint16(const uint16_t data);
 extern void hspi_send_uint16_r(const uint16_t data, uint32_t repeats);
