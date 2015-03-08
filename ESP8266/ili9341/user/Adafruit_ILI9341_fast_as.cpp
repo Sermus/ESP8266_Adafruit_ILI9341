@@ -26,15 +26,17 @@ extern "C"{
 
 extern "C" int ets_uart_printf(const char *fmt, ...);
 
-Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
+ICACHE_FLASH_ATTR Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
 	tabcolor = 0;
 	ets_uart_printf("Adafruit_ILI9341::Adafruit_ILI9341()");
 }
 
 void Adafruit_ILI9341::transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte)
 {
+	hspi_wait_ready();
 	TFT_DC_COMMAND;
 	hspi_send_uint8(cmd);
+	hspi_wait_ready();
 	TFT_DC_DATA;
 	hspi_send_data(data, numDataByte);
 }
@@ -157,19 +159,9 @@ ICACHE_FLASH_ATTR void Adafruit_ILI9341::begin(void) {
 	transmitCmd(0x2c);
 }
 
-#define MAKEWORD(b1, b2, b3, b4) (uint32_t(b1) | ((b2) << 8) | ((b3) << 16) | ((b4) << 24))
-
-void Adafruit_ILI9341::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1,
-		uint16_t y1) {
-	transmitCmdData(ILI9341_CASET, MAKEWORD(x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF));
-	transmitCmdData(ILI9341_PASET, MAKEWORD(y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF));
-	transmitCmd(ILI9341_RAMWR); // write to RAM
-}
-
 void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 	if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
-
 	setAddrWindow(x,y,x+1,y+1);
 	transmitData(color);
 }
@@ -198,7 +190,7 @@ void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
 	transmitData(color, w);
 }
 
-void Adafruit_ILI9341::fillScreen(uint16_t color) {
+ICACHE_FLASH_ATTR void Adafruit_ILI9341::fillScreen(uint16_t color) {
 	fillRect(0, 0,  _width, _height, color);
 }
 

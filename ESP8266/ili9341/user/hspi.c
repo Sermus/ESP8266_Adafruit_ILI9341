@@ -32,7 +32,12 @@ void hspi_init(void)
 	   ((1 & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) |
 	   ((3 & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) |
 	   ((1 & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) |
-	   ((3 & SPI_CLKCNT_L) << SPI_CLKCNT_L_S));}
+	   ((3 & SPI_CLKCNT_L) << SPI_CLKCNT_L_S));
+
+	uint32_t regvalue = SPI_FLASH_DOUT;
+    regvalue &= ~(BIT2 | SPI_FLASH_USR_ADDR | SPI_FLASH_USR_DUMMY | SPI_FLASH_USR_DIN | SPI_USR_COMMAND | SPI_DOUTDIN); //clear bit 2 see example IoT_Demo
+	WRITE_PERI_REG(SPI_FLASH_USER(HSPI), regvalue);
+}
 
 #define SPIFIFOSIZE 16 //16 words length
 
@@ -43,10 +48,6 @@ inline void hspi_wait_ready()
 
 inline void hspi_prepare_tx(uint32_t bytecount)
 {
-	uint32_t regvalue = SPI_FLASH_DOUT;
-    regvalue &= ~(BIT2 | SPI_FLASH_USR_ADDR | SPI_FLASH_USR_DUMMY | SPI_FLASH_USR_DIN | SPI_USR_COMMAND | SPI_DOUTDIN); //clear bit 2 see example IoT_Demo
-	WRITE_PERI_REG(SPI_FLASH_USER(HSPI), regvalue);
-
 	uint32_t bitcount = bytecount * 8 - 1;
 
 //	WRITE_PERI_REG(SPI_FLASH_USER1(HSPI), (bitcount & SPI_USR_OUT_BITLEN) << SPI_USR_OUT_BITLEN_S);
@@ -62,43 +63,40 @@ inline void hspi_start_tx()
 
 void hspi_send_uint8(uint8_t data)
 {
-	hspi_wait_ready();
 	hspi_prepare_tx(1);
 	*spi_fifo = data;
 	hspi_start_tx();
-	hspi_wait_ready();
 }
 
 void hspi_send_uint16(uint16_t data)
 {
-	hspi_wait_ready();
 	hspi_prepare_tx(2);
 	*spi_fifo = data;
 	hspi_start_tx();
-	hspi_wait_ready();
 }
 
 void hspi_send_uint32(uint32_t data)
 {
-	hspi_wait_ready();
 	hspi_prepare_tx(4);
 	*spi_fifo = data;
 	hspi_start_tx();
-	hspi_wait_ready();
 }
 
 void hspi_send_uint16_r(uint16_t data, uint32_t repeats)
 {
 	uint32_t i;
-	hspi_wait_ready();
-	hspi_prepare_tx(2);
-	*spi_fifo = data;
-	for (i = 0; i < repeats; i++)
+	uint32_t word = data << 16 | data;
+
+	while(repeats > 0)
 	{
+		uint8_t words_to_transfer = __min((repeats + 1) / 2, SPIFIFOSIZE);
 		hspi_wait_ready();
+		hspi_prepare_tx(__min(repeats * 2, SPIFIFOSIZE * 4));
+		for(i = 0; i < words_to_transfer;i++)
+			spi_fifo[i] = word;
 		hspi_start_tx();
+		repeats -= words_to_transfer * 2;
 	}
-	hspi_wait_ready();
 }
 
 void hspi_send_data(const uint8_t * data, uint8_t datasize)
@@ -107,10 +105,8 @@ void hspi_send_data(const uint8_t * data, uint8_t datasize)
 	uint8_t i;
 
 	uint8_t words_to_send = __min((datasize + 3) / 4, SPIFIFOSIZE);
-	hspi_wait_ready();
 	hspi_prepare_tx(datasize);
 	for(i = 0; i < words_to_send;i++)
 		spi_fifo[i] = _data[i];
 	hspi_start_tx();
-	hspi_wait_ready();
 }

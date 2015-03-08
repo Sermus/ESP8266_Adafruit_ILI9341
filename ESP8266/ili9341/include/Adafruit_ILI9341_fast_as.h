@@ -100,14 +100,22 @@ extern "C"
 #define TFT_RST_DEACTIVE 	GPIO_OUTPUT_SET(4, 1)
 #define TFT_RST_INIT		PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO4_U, FUNC_GPIO4); TFT_RST_DEACTIVE
 
+#define MAKEWORD(b1, b2, b3, b4) (uint32_t(b1) | ((b2) << 8) | ((b3) << 16) | ((b4) << 24))
+
 class Adafruit_ILI9341 : public Adafruit_GFX_AS {
 
- public:
+private:
+ uint8_t  tabcolor;
+ void transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte);
+ inline void transmitData(uint16_t data) {hspi_wait_ready(); hspi_send_uint16(data);}
+ inline void transmitCmdData(uint8_t cmd, uint32_t data) {hspi_wait_ready(); TFT_DC_COMMAND; hspi_send_uint8(cmd); hspi_wait_ready(); TFT_DC_DATA; hspi_send_uint32(data);}
+ inline void transmitData(uint16_t data, uint32_t repeats){hspi_wait_ready(); hspi_send_uint16_r(data, repeats);}
+ inline void transmitCmd(uint8_t cmd){hspi_wait_ready(); TFT_DC_COMMAND; hspi_send_uint8(cmd);hspi_wait_ready(); TFT_DC_DATA;}
 
+public:
   Adafruit_ILI9341();
 
   void     begin(void),
-           setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1),
            fillScreen(uint16_t color),
            drawPixel(int16_t x, int16_t y, uint16_t color),
            drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
@@ -116,15 +124,12 @@ class Adafruit_ILI9341 : public Adafruit_GFX_AS {
              uint16_t color),
            setRotation(uint8_t r),
            invertDisplay(bool i);
+  inline void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+  {	  transmitCmdData(ILI9341_CASET, MAKEWORD(x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF));
+  	  transmitCmdData(ILI9341_PASET, MAKEWORD(y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF));
+	  transmitCmd(ILI9341_RAMWR); // write to RAM
+  }
   uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
-
- private:
-  uint8_t  tabcolor;
-  void transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte);
-  inline void transmitData(uint16_t data) {hspi_send_uint16(data);}
-  inline void transmitCmdData(uint8_t cmd, uint32_t data) {TFT_DC_COMMAND; hspi_send_uint8(cmd); TFT_DC_DATA; hspi_send_uint32(data);}
-  inline void transmitData(uint16_t data, uint32_t repeats){hspi_send_uint16_r(data, repeats);}
-  inline void transmitCmd(uint8_t cmd){TFT_DC_COMMAND; hspi_send_uint8(cmd);TFT_DC_DATA;}
 };
 
 #endif
