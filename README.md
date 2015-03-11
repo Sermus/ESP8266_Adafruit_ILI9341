@@ -12,13 +12,20 @@ What to demonstrate is controlled by macro UIDEMO defined at the beginning of us
 Wiring:
 The code uses hardware HSPI with hardware controlled CS, so the wiring shall be as follows: 
 
-ILI9341 pin	ESP8266 pin
-MISO 		GPIO12
-CLK 		GPIO14
-CS 		GPIO0
-DC 		GPIO2
+ILI9341 pin -->	ESP8266 pin
+
+MISO 	-->	GPIO12
+
+CLK 	-->	GPIO14
+
+CS 	-->	GPIO0
+
+DC 	-->	GPIO2
+
 Reset to 3.3v
+
 GND to ground
+
 MOSI may be left unconnected
 
 
