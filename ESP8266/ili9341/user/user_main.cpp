@@ -11,7 +11,6 @@
 
 #include "Adafruit_ILI9341_fast_as.h"
 #include "cube.h"
-
 // =============================================================================================
 // C includes and declarations
 // =============================================================================================
@@ -23,7 +22,7 @@ extern "C"
 #include "user_config.h"
 #include "espmissingincludes.h"
 #include "driver/uart.h"
-#include "time.h"
+#include "hspi.h"
 // declare lib methods
 extern int ets_uart_printf(const char *fmt, ...);
 void ets_timer_disarm(ETSTimer *ptimer);
@@ -34,31 +33,39 @@ LOCAL os_timer_t timerHandler;
 Adafruit_ILI9341 tft;
 
 LOCAL double degree = -180.0;
-LOCAL double scale = 2.0;
+LOCAL double scale = 1.5;
 LOCAL double scale_inc = 0.01;
 int16_t current[AMOUNT_NODE][3];
 int16_t previous[AMOUNT_NODE][3];
 
-ICACHE_FLASH_ATTR static void updateScreen(void)
+static void updateScreen(void)
 {
 	REG_SET_BIT(0x3ff00014, BIT(0));
 	os_update_cpu_frequency(160);
 
-	/*
-	if (degree >= 180.0) degree = -180.0;
 	if ((scale < 0.5) && (scale_inc < 0)) scale_inc = -scale_inc;
 	if ((scale > 1.5) && (scale_inc > 0)) scale_inc = -scale_inc;
-	cube_calculate(current, degree, degree, degree, scale, 0, 0, 0);
-	degree += 2.5;
+	cube_calculate(current, degree, 0, 0, scale, 0, 0, 0);
+	degree += 4;
+	if (degree > 180.0) degree -= 360.0;
 //	scale += scale_inc;
 	cube_draw(previous, 0);
-	cube_draw(current, 0xFFFF);
+	cube_draw(current, 0XFFFF);
     memcpy(previous, current, sizeof (previous));
-	 */
+	/*
 	uint32_t begin  = system_get_rtc_time();
-	for (int i = 0; i < 100; i++) tft.drawLine(0,0,240,240,0xFFFF);
+//	*spi_fifo = 0xFFFF;
+//	uint32_t bitcount = 2 * 8 - 1;
+//	WRITE_PERI_REG(SPI_FLASH_USER1(HSPI), (bitcount & SPI_USR_OUT_BITLEN) << SPI_USR_OUT_BITLEN_S);
+	for (int i = 0; i < 100; i++)
+	{
+
+//		SET_PERI_REG_MASK(SPI_FLASH_CMD(HSPI), SPI_FLASH_USR);
+		tft.drawLine(0,0,240,240,0xFFFF);
+	}
 	uint32_t end  = system_get_rtc_time();
 	ets_uart_printf("\r\nbenchmark:%d\r\n", end - begin);
+	*/
 }
 
 ICACHE_FLASH_ATTR void sendMsgToHandler(void *arg)
@@ -93,7 +100,7 @@ extern "C" ICACHE_FLASH_ATTR void user_init(void)
 	// Set up a timer to send the message to handler
 	os_timer_disarm(&timerHandler);
 	os_timer_setfn(&timerHandler, (os_timer_func_t *)sendMsgToHandler, (void *)0);
-	os_timer_arm(&timerHandler, 20, 1);
+	os_timer_arm(&timerHandler, 25, 1);
 
 	// Set up a timerHandler to send the message to handler
 	handlerQueue = (os_event_t *)os_malloc(sizeof(os_event_t)*TEST_QUEUE_LEN);
