@@ -2,19 +2,15 @@
 #define _ADAFRUIT_GFX_AS_H
 
 #include "Load_fonts.h"
-#include <ets_sys.h>
+#include <c_types.h>
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
 
 class Adafruit_GFX_AS {
-
  public:
-
   Adafruit_GFX_AS(int16_t w, int16_t h); // Constructor
 
   // This MUST be defined by the subclass:
   virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
-  void drawQuad(int16_t x, int16_t y, uint16_t color);
 
   // These MAY be overridden by the subclass to provide device-specific
   // optimized code.  Otherwise 'generic' versions are used.

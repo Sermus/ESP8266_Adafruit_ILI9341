@@ -1,18 +1,3 @@
-/***************************************************
-  This is our library for the Adafruit ILI9341 Breakout and Shield
-  ----> http://www.adafruit.com/products/1651
-
-  Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.
-  MIT license, all text above must be included in any redistribution
- ****************************************************/
-
 #include "Adafruit_ILI9341_fast_as.h"
 #include "Adafruit_GFX_AS.h"
 
@@ -24,11 +9,8 @@ extern "C"{
 #include "espmissingincludes.h"
 }
 
-extern "C" int ets_uart_printf(const char *fmt, ...);
-
 ICACHE_FLASH_ATTR Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
 	tabcolor = 0;
-	ets_uart_printf("Adafruit_ILI9341::Adafruit_ILI9341()");
 }
 
 void Adafruit_ILI9341::transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte)

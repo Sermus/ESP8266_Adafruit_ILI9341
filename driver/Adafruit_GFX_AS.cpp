@@ -54,7 +54,7 @@ extern "C" {
 #endif
 
 #define abs(x) ((x)<0 ? -(x) : (x))
-extern "C" int ets_uart_printf(const char *fmt, ...);
+#define swap(x, y) do { typeof(x) temp##x##y = x; x = y; y = temp##x##y; } while (0)
 
 ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 		  WIDTH(w), HEIGHT(h)
@@ -64,7 +64,6 @@ ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 	rotation  = 0;
 	textcolor = textbgcolor = 0xFFFF;
 	wrap      = true;
-	ets_uart_printf("Adafruit_GFX_AS::Adafruit_GFX_AS()");
 }
 
 // Draw a circle outline
@@ -247,11 +246,8 @@ void Adafruit_GFX_AS::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	}
 }
 
-extern "C" int ets_uart_printf(const char *fmt, ...);
-
 void Adafruit_GFX_AS::fillScreen(uint16_t color) {
 	fillRect(0, 0, _width, _height, color);
-	ets_uart_printf("%d x %d", _width, _height);
 }
 
 // Draw a rounded rectangle
@@ -422,14 +418,6 @@ void Adafruit_GFX_AS::invertDisplay(bool i) {
 	// Do nothing, must be subclassed if supported
 }
 
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawQuad(int16_t x, int16_t y, uint16_t color)
-{
-	drawPixel(x, y, color);
-	drawPixel(x + 1, y, color);
-	drawPixel(x, y + 1, color);
-	drawPixel(x + 1, y + 1, color);
-}
-
 /***************************************************************************************
  ** Function name:           drawUnicode
  ** Descriptions:            draw a unicode
@@ -487,12 +475,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x,
 		height = chr_hgt_f7s;
 		gap = 2;
 	}
-	if (size == 8) {
-		flash_address = chrtbl_f7s[uniCode];
-		width = *(widtbl_f7s+uniCode);
-		height = chr_hgt_f7s;
-		gap = 4;
-	}
 #endif
 
 	uint16_t w = (width+ 7) / 8;
@@ -501,8 +483,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x,
 	uint16_t color   = 0;
 	uint8_t line = 0;
 
-	if (size < 8)
-	{
 		for(int i=0; i<height; i++)
 		{
 			if (textcolor != textbgcolor) drawFastHLine(x, pY, width+gap, textbgcolor);
@@ -523,35 +503,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x,
 			}
 			pY++;
 		}
-	}
-	else if (size == 8)
-	{
-		for(int i=0; i<height; i++)
-		{
-			if (textcolor != textbgcolor)
-			{
-				drawFastHLine(x, pY, width * 2+gap, textbgcolor);
-				drawFastHLine(x, pY + 1, width * 2+gap, textbgcolor);
-			}
-			for (int k = 0;k < w; k++)
-			{
-				line = *(flash_address+w*i+k);
-				if(line) {
-					pX = x + k*16;
-					if(line & 0x80) drawQuad(pX, pY, textcolor);
-					if(line & 0x40) drawQuad(pX+2, pY, textcolor);
-					if(line & 0x20) drawQuad(pX+4, pY, textcolor);
-					if(line & 0x10) drawQuad(pX+6, pY, textcolor);
-					if(line & 0x8) drawQuad(pX+8, pY, textcolor);
-					if(line & 0x4) drawQuad(pX+10, pY, textcolor);
-					if(line & 0x2) drawQuad(pX+12, pY, textcolor);
-					if(line & 0x1) drawQuad(pX+14, pY, textcolor);
-				}
-			}
-			pY += 2;
-		}
-		width *= 2;
-	}
 	return width+gap;        // x +
 }
 
@@ -565,7 +516,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, ui
 	if (long_num < 0) snprintf(tmp, sizeof(tmp), "%d", long_num);
 	else snprintf(tmp, sizeof(tmp), "%u", long_num);
 	return drawString(tmp, poX, poY, size);
-
 }
 
 /***************************************************************************************
@@ -630,7 +580,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint
 #endif
 #ifdef LOAD_FONT7
 		if (size==7) len += *(widtbl_f7s+ascii-32)+2;
-		if (size==8) len += (*(widtbl_f7s+ascii-32)+2) * 2;
 		*pointer++;
 #endif
 	}

@@ -1,14 +1,3 @@
-/*
- *  Example of working ESP8266 and 2.2 Inch SPI TFT LCD Serial Port Module Display ILI9341
- *  Specification on ILI9341 - http://www.newhavendisplay.com/app_notes/ILI9341.pdf
- *  Specification on ESP8266 - http://www.esp8266.com/
- *
- *  Original source https://github.com/Perfer/esp8266_ili9341
- *
- *  Author: Semen Sachkov
- *
- */
-
 #include "Adafruit_ILI9341_fast_as.h"
 #include "cube.h"
 // =============================================================================================
@@ -18,11 +7,7 @@
 
 extern "C"
 {
-#include <osapi.h>
-#include "user_config.h"
 #include "espmissingincludes.h"
-#include "driver/uart.h"
-#include "hspi.h"
 // declare lib methods
 extern int ets_uart_printf(const char *fmt, ...);
 void ets_timer_disarm(ETSTimer *ptimer);
@@ -34,38 +19,19 @@ Adafruit_ILI9341 tft;
 
 LOCAL double degree = -180.0;
 LOCAL double scale = 1.5;
-LOCAL double scale_inc = 0.01;
-int16_t current[AMOUNT_NODE][3];
-int16_t previous[AMOUNT_NODE][3];
+int16_t current[VERTEX_COUNT][3];
+int16_t previous[VERTEX_COUNT][3];
 
 static void updateScreen(void)
 {
 	REG_SET_BIT(0x3ff00014, BIT(0));
 	os_update_cpu_frequency(160);
-
-	if ((scale < 0.5) && (scale_inc < 0)) scale_inc = -scale_inc;
-	if ((scale > 1.5) && (scale_inc > 0)) scale_inc = -scale_inc;
 	cube_calculate(current, degree, 0, 0, scale, 0, 0, 0);
 	degree += 4;
 	if (degree > 180.0) degree -= 360.0;
-//	scale += scale_inc;
 	cube_draw(previous, 0);
 	cube_draw(current, 0XFFFF);
     memcpy(previous, current, sizeof (previous));
-	/*
-	uint32_t begin  = system_get_rtc_time();
-//	*spi_fifo = 0xFFFF;
-//	uint32_t bitcount = 2 * 8 - 1;
-//	WRITE_PERI_REG(SPI_FLASH_USER1(HSPI), (bitcount & SPI_USR_OUT_BITLEN) << SPI_USR_OUT_BITLEN_S);
-	for (int i = 0; i < 100; i++)
-	{
-
-//		SET_PERI_REG_MASK(SPI_FLASH_CMD(HSPI), SPI_FLASH_USR);
-		tft.drawLine(0,0,240,240,0xFFFF);
-	}
-	uint32_t end  = system_get_rtc_time();
-	ets_uart_printf("\r\nbenchmark:%d\r\n", end - begin);
-	*/
 }
 
 ICACHE_FLASH_ATTR void sendMsgToHandler(void *arg)
@@ -94,8 +60,6 @@ extern "C" ICACHE_FLASH_ATTR void user_init(void)
 	// Initialize TFT
 	tft.begin();
 	tft.fillScreen(0);
-	cube_draw_init();
-	ets_uart_printf("\r\ntft initialized\r\n");
 
 	// Set up a timer to send the message to handler
 	os_timer_disarm(&timerHandler);
