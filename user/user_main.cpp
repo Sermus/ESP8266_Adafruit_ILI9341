@@ -1,9 +1,13 @@
+#define UIDEMO
+
+
 #include "Adafruit_ILI9341_fast_as.h"
 #include "cube.h"
 // =============================================================================================
 // C includes and declarations
 // =============================================================================================
 #include "cpp_routines/routines.h"
+#include <time.h>
 
 extern "C"
 {
@@ -17,12 +21,46 @@ void ets_timer_setfn(ETSTimer *ptimer, ETSTimerFunc *pfunction, void *parg);
 LOCAL os_timer_t timerHandler;
 Adafruit_ILI9341 tft;
 
+#ifdef UIDEMO
+extern void updateScreen(bool mode);
+extern void setupUI();
+
+float target_room_temperature = 23.5;
+float RW_temperature = 65;
+float target_RW_temperature = 70;
+float room1_temperature = 23.4;
+float room2_temperature = 23.3;
+float outside_temperature = 2.4;
+float min_target_temp = 18;
+float max_target_temp = 26;
+bool heater_enabled = false;
+unsigned long room1_updated = -1;
+unsigned long room2_updated = -1;
+unsigned long outside_updated = -1;
+unsigned long heater_state_changed_time = 0;
+time_t total_on_time = 1;
+time_t total_off_time = 1;
+time_t last24h_on_time = 1;
+time_t last24h_off_time = 1;
+
+ICACHE_FLASH_ATTR static void updateScreen(void)
+{
+	REG_SET_BIT(0x3ff00014, BIT(0));
+	os_update_cpu_frequency(160);
+
+	target_room_temperature += 0.1;
+	if (target_room_temperature > max_target_temp)
+		target_room_temperature = min_target_temp;
+
+	updateScreen(system_get_rtc_time() / CLOCKS_PER_SEC % 2);
+}
+#else
 LOCAL double degree = -180.0;
 LOCAL double scale = 1.5;
 int16_t current[VERTEX_COUNT][3];
 int16_t previous[VERTEX_COUNT][3];
 
-static void updateScreen(void)
+ICACHE_FLASH_ATTR static void updateScreen(void)
 {
 	REG_SET_BIT(0x3ff00014, BIT(0));
 	os_update_cpu_frequency(160);
@@ -33,6 +71,7 @@ static void updateScreen(void)
 	cube_draw(current, 0XFFFF);
     memcpy(previous, current, sizeof (previous));
 }
+#endif
 
 ICACHE_FLASH_ATTR void sendMsgToHandler(void *arg)
 {
@@ -59,7 +98,13 @@ extern "C" ICACHE_FLASH_ATTR void user_init(void)
 
 	// Initialize TFT
 	tft.begin();
+
+#ifdef UIDEMO
+	setupUI();
+	target_room_temperature = min_target_temp;
+#else
 	tft.fillScreen(0);
+#endif
 
 	// Set up a timer to send the message to handler
 	os_timer_disarm(&timerHandler);
