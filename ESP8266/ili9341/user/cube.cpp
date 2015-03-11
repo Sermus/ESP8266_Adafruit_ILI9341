@@ -7,7 +7,7 @@ extern "C"
 #include <math.h>
 }
 
-static const int16_t pix[AMOUNT_NODE][3] = {{-25,-25,-25},{25,-25,-25},{25,25,-25},{-25,25,-25},
+static const int16_t pix[VERTEX_COUNT][3] = {{-25,-25,-25},{25,-25,-25},{25,25,-25},{-25,25,-25},
     {-25,-25,25}, {25,-25,25}, {25,25,25}, {-25,25,25}
 };
 
@@ -24,7 +24,7 @@ static void drawLine( int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t co
     tft.drawLine(x0 + 120, y0 + 160, x1 + 120, y1 + 160, color);
 }
 
-ICACHE_FLASH_ATTR void cube_calculate(int16_t _pix[AMOUNT_NODE][3], double degreeX, double degreeY, double degreeZ, double scale, int16_t shiftX, int16_t shiftY, int16_t shiftZ)
+ICACHE_FLASH_ATTR void cube_calculate(int16_t _pix[VERTEX_COUNT][3], double degreeX, double degreeY, double degreeZ, double scale, int16_t shiftX, int16_t shiftY, int16_t shiftZ)
 {
 
     uint8_t i;
@@ -35,7 +35,7 @@ ICACHE_FLASH_ATTR void cube_calculate(int16_t _pix[AMOUNT_NODE][3], double degre
     cordic(degreeY, &siny, &cosy);
     cordic(degreeZ, &sinz, &cosz);
 
-    for (i = 0; i < AMOUNT_NODE; i++) {
+    for (i = 0; i < VERTEX_COUNT; i++) {
 
         x = pix[i][0];   // Base coordinate
         y = pix[i][1];
@@ -63,21 +63,21 @@ ICACHE_FLASH_ATTR void cube_calculate(int16_t _pix[AMOUNT_NODE][3], double degre
     }
 }
 
-ICACHE_FLASH_ATTR void cube_draw(int16_t _pix[AMOUNT_NODE][3], uint16_t color)
+ICACHE_FLASH_ATTR void cube_draw(int16_t _pix[VERTEX_COUNT][3], uint16_t color)
 {
     uint8_t i, j;
     int16_t x0, y0, x1, y1;
 
-    for (j = 0; j < AMOUNT_NODE; j++) {
+    for (j = 0; j < VERTEX_COUNT; j++) {
         i = j;
         calcPerspectiveProjection(_pix[i], &x0, &y0);
-        if (i < AMOUNT_NODE/2) { // Draw sealing ribs
+        if (i < VERTEX_COUNT/2) { // Draw sealing ribs
             calcPerspectiveProjection(_pix[i+4], &x1, &y1);
             drawLine(x0, y0, x1, y1, color);
         }
         i ++;
-        i = (i == AMOUNT_NODE/2) ? 0 : i;   // Draws front face
-        i = (i == AMOUNT_NODE) ? 4 : i;	// Draws back face
+        i = (i == VERTEX_COUNT/2) ? 0 : i;   // Draws front face
+        i = (i == VERTEX_COUNT) ? 4 : i;	// Draws back face
 
         calcPerspectiveProjection(_pix[i], &x1, &y1);
         drawLine(x0, y0, x1, y1, color);

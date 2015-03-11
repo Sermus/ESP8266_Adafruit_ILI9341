@@ -8,6 +8,10 @@
 // 1.0 = 1073741824
 // 1/k = 0.6072529350088812561694
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Constants
 #define M_PI			3.14159265358979323846
 #define cordic_1K 		0x26DD3B6A
@@ -16,5 +20,9 @@
 #define CORDIC_NTAB 	32
 
 void cordic(double degree, double *s, double *c);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* INCLUDE_CORDIC_H_ */

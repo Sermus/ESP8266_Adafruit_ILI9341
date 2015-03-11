@@ -15,7 +15,7 @@ extern uint32_t *spi_fifo;
 
 extern void hspi_init(void);
 extern void hspi_send_data(const uint8_t * data, uint8_t datasize);
-extern void hspi_send_uint16_r(const uint16_t data, uint32_t repeats);
+extern void hspi_send_uint16_r(const uint16_t data, int32_t repeats);
 inline void hspi_wait_ready(void){while (READ_PERI_REG(SPI_FLASH_CMD(HSPI))&SPI_FLASH_USR);}
 
 inline void hspi_prepare_tx(uint32_t bytecount)
@@ -23,9 +23,6 @@ inline void hspi_prepare_tx(uint32_t bytecount)
 	uint32_t bitcount = bytecount * 8 - 1;
 
 	WRITE_PERI_REG(SPI_FLASH_USER1(HSPI), (bitcount & SPI_USR_OUT_BITLEN) << SPI_USR_OUT_BITLEN_S);
-//	WRITE_PERI_REG(SPI_FLASH_USER1(HSPI),
-//			( (bitcount & SPI_USR_OUT_BITLEN) << SPI_USR_OUT_BITLEN_S ) |
-//			( (bitcount & SPI_USR_DIN_BITLEN) << SPI_USR_DIN_BITLEN_S ) );
 }
 
 
