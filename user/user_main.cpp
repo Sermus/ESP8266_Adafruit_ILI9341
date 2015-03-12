@@ -1,4 +1,4 @@
-#define UIDEMO
+//#define UIDEMO
 
 
 #include "Adafruit_ILI9341_fast_as.h"
@@ -51,8 +51,7 @@ ICACHE_FLASH_ATTR static void updateScreen(void)
 	target_room_temperature += 0.1;
 	if (target_room_temperature > max_target_temp)
 		target_room_temperature = min_target_temp;
-
-	updateScreen(system_get_rtc_time() / CLOCKS_PER_SEC % 2);
+	updateScreen((system_get_rtc_time() / 1000000) % 2);
 }
 #else
 LOCAL double degree = -180.0;
@@ -99,17 +98,16 @@ extern "C" ICACHE_FLASH_ATTR void user_init(void)
 	// Initialize TFT
 	tft.begin();
 
+	tft.fillScreen(0);
 #ifdef UIDEMO
 	setupUI();
 	target_room_temperature = min_target_temp;
-#else
-	tft.fillScreen(0);
 #endif
 
 	// Set up a timer to send the message to handler
 	os_timer_disarm(&timerHandler);
 	os_timer_setfn(&timerHandler, (os_timer_func_t *)sendMsgToHandler, (void *)0);
-	os_timer_arm(&timerHandler, 25, 1);
+	os_timer_arm(&timerHandler, 1, 1);
 
 	// Set up a timerHandler to send the message to handler
 	handlerQueue = (os_event_t *)os_malloc(sizeof(os_event_t)*TEST_QUEUE_LEN);

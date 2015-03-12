@@ -126,7 +126,7 @@ ICACHE_FLASH_ATTR  void drawWaterTemperatures()
 
 ICACHE_FLASH_ATTR  time_t now()
 {
-	return system_get_rtc_time() / CLOCKS_PER_SEC - start_time;
+	return system_get_rtc_time() / 100000 - start_time;
 }
 
 ICACHE_FLASH_ATTR  void drawUpdated()
@@ -241,8 +241,7 @@ ICACHE_FLASH_ATTR void updateScreen(bool changeTempMode)
 
 ICACHE_FLASH_ATTR void setupUI()
 {
-	start_time = system_get_rtc_time() / CLOCKS_PER_SEC;
-	tft.begin();
+	start_time = system_get_rtc_time() / 100000;
 	tft.setRotation(3);
 	tft.setTextColor(VGA_GREEN, VGA_BLACK);
 	tft.fillScreen(ILI9341_BLACK);

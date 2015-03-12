@@ -9,6 +9,8 @@ CS GPIO0
 DC GPIO2
 */
 
+#define HSPI_PRESCALER 1// target hspi clock speed is 40MHz/HSPI_PRESCALER, so that with prescaler 2 the hspi clock is 30MHz
+
 #define __min(a,b) ((a > b) ? (b):(a))
 uint32_t *spi_fifo;
 
@@ -28,10 +30,10 @@ void hspi_init(void)
 	// time length HIGHT level = (CPU clock / 10 / 2) ^ -1,
 	// time length LOW level = (CPU clock / 10 / 2) ^ -1
 	WRITE_PERI_REG(SPI_FLASH_CLOCK(HSPI),
-	   ((0 & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) |
-	   ((7 & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) |
-	   ((3 & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) |
-	   ((7 & SPI_CLKCNT_L) << SPI_CLKCNT_L_S));
+	   (((HSPI_PRESCALER - 1) & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) |
+	   ((1 & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) |
+	   ((0 & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) |
+	   ((1 & SPI_CLKCNT_L) << SPI_CLKCNT_L_S));
 
 	WRITE_PERI_REG(SPI_FLASH_CTRL1(HSPI), 0);
 
