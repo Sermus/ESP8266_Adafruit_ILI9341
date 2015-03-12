@@ -14,6 +14,10 @@ http://esp8266.ru/forum/threads/obsuzhdenie-unofficial-development-kit-for-espre
 The driver itself and needed dependencies are in /driver and /include/driver.
 The driver is written in C++ which is not well supported by ESP8266 toolchain and sdk, so some dirty hack is needed to properly contstruct C++ objects. The code for this is in user/routines.cpp.
 
+## SPI staff
+In spite of the fact that according to the datasheet max ILI9341's clock speed is 10MHz mine robustly works at up to 40MHz so I added SPI speed prescaler macro at the beginning of hspi.c.
+Defining it to 1 means HSPI will be clocked at 40MHz, 4 means 10 MHz.
+
 ## Sample code
 The sample code consists of two parts:
 
