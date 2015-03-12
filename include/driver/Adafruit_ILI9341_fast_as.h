@@ -97,7 +97,7 @@ private:
  void transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t numDataByte);
  inline void transmitData(uint16_t data) {hspi_wait_ready(); hspi_send_uint16(data);}
  inline void transmitCmdData(uint8_t cmd, uint32_t data) {hspi_wait_ready(); TFT_DC_COMMAND; hspi_send_uint8(cmd); hspi_wait_ready(); TFT_DC_DATA; hspi_send_uint32(data);}
- inline void transmitData(uint16_t data, uint32_t repeats){hspi_wait_ready(); hspi_send_uint16_r(data, repeats);}
+ inline void transmitData(uint16_t data, int32_t repeats){hspi_wait_ready(); hspi_send_uint16_r(data, repeats);}
  inline void transmitCmd(uint8_t cmd){hspi_wait_ready(); TFT_DC_COMMAND; hspi_send_uint8(cmd);hspi_wait_ready(); TFT_DC_DATA;}
 
 public:

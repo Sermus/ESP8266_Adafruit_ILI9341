@@ -47,13 +47,13 @@ void hspi_send_uint16_r(uint16_t data, int32_t repeats)
 
 	while(repeats > 0)
 	{
-		uint8_t words_to_transfer = __min((repeats + 1) / 2, SPIFIFOSIZE);
+		uint16_t bytes_to_transfer = __min(repeats * sizeof(uint16_t) , SPIFIFOSIZE * sizeof(uint32_t));
 		hspi_wait_ready();
-		hspi_prepare_tx(__min(repeats * sizeof(uint16_t), SPIFIFOSIZE * sizeof(uint32_t)));
-		for(i = 0; i < words_to_transfer;i++)
+		hspi_prepare_tx(bytes_to_transfer);
+		for(i = 0; i < (bytes_to_transfer + 3) / 4;i++)
 			spi_fifo[i] = word;
 		hspi_start_tx();
-		repeats -= words_to_transfer * sizeof(uint32_t);
+		repeats -= bytes_to_transfer / 2;
 	}
 }
 
