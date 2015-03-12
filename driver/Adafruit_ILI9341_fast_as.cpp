@@ -9,6 +9,7 @@ extern "C"{
 #include "espmissingincludes.h"
 }
 
+#define SWAPBYTES(i) ((i>>8) | (i<<8))
 ICACHE_FLASH_ATTR Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
 	tabcolor = 0;
 }
@@ -145,7 +146,7 @@ void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 	if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
 	setAddrWindow(x,y,x+1,y+1);
-	transmitData(color);
+	transmitData(SWAPBYTES(color));
 }
 
 
@@ -159,7 +160,7 @@ void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
 		h = _height-y;
 
 	setAddrWindow(x, y, x, y+h-1);
-	transmitData(color, h);
+	transmitData(SWAPBYTES(color), h);
 }
 
 void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
@@ -169,7 +170,7 @@ void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
 	if((x >= _width) || (y >= _height)) return;
 	if((x+w-1) >= _width)  w = _width-x;
 	setAddrWindow(x, y, x+w-1, y);
-	transmitData(color, w);
+	transmitData(SWAPBYTES(color), w);
 }
 
 ICACHE_FLASH_ATTR void Adafruit_ILI9341::fillScreen(uint16_t color) {
@@ -186,7 +187,7 @@ void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	if((y + h - 1) >= _height) h = _height - y;
 
 	setAddrWindow(x, y, x+w-1, y+h-1);
-	transmitData(color, h*w);
+	transmitData(SWAPBYTES(color), h*w);
 }
 
 
