@@ -21,8 +21,9 @@ Defining it to 1 means HSPI will be clocked at 40MHz, 4 means 10 MHz.
 ## Sample code
 The sample code consists of two parts:
 
-1) Rotating cube
-2) Sample HVAC controller UI (for the extended version of this: http://habrahabr.ru/post/214257/)
+1) Rotating cube https://youtu.be/kEWThKicO0Q
+
+2) Sample HVAC controller UI (for the extended version of this: http://habrahabr.ru/post/214257/) https://youtu.be/VraLl8XK1CI
 
 What to demonstrate is controlled by macro UIDEMO defined at the beginning of user_main.cpp. If it's defined then the sample HVAC controller UI is shown, else, the rotating cube is rendered.
 
