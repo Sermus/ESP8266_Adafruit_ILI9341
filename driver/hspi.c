@@ -5,11 +5,11 @@ Pinout:
 MISO GPIO12
 MOSI GPIO13
 CLK GPIO14
-CS GPIO0
+CS GPIO15
 DC GPIO2
 */
 
-#define HSPI_PRESCALER 1// target hspi clock speed is 40MHz/HSPI_PRESCALER, so that with prescaler 2 the hspi clock is 30MHz
+#define HSPI_PRESCALER 4// target hspi clock speed is 40MHz/HSPI_PRESCALER, so that with prescaler 2 the hspi clock is 30MHz
 
 #define __min(a,b) ((a > b) ? (b):(a))
 uint32_t *spi_fifo;
@@ -23,7 +23,7 @@ void hspi_init(void)
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, 2); // HSPIQ MISO GPIO12
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, 2); // HSPID MOSI GPIO13
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTMS_U, 2); // CLK GPIO14
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, 2); // CLK GPIO15
+	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, 2); // CS GPIO15
 
 
 	// SPI clock = CPU clock / 10 / 4
