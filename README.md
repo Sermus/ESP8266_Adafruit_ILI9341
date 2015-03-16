@@ -36,7 +36,7 @@ MISO 	-->	GPIO12
 
 CLK 	-->	GPIO14
 
-CS 	-->	GPIO0
+CS 	-->	GPIO15
 
 DC 	-->	GPIO2
 
