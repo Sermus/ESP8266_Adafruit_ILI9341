@@ -32,7 +32,7 @@ The code uses hardware HSPI with hardware controlled CS, so the wiring shall be 
 
 ILI9341 pin -->	ESP8266 pin
 
-MISO 	-->	GPIO12
+MOSI 	-->	GPIO12
 
 CLK 	-->	GPIO14
 
@@ -44,6 +44,6 @@ Reset to 3.3v
 
 GND to ground
 
-MOSI may be left unconnected
+MISO may be left unconnected
 
 
