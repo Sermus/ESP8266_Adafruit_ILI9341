@@ -13,12 +13,13 @@ FW_BASE		= firmware
 XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= c:/Espressif/ESP8266_SDK
+SDK_BASE	?= c:/Espressif/ESP8266_NONOS_SDK
 
 # esptool path and port
-SDK_TOOLS	?= c:/Espressif/utils
-ESPTOOL		?= $(SDK_TOOLS)/esptool.exe
-ESPPORT		?= COM11
+SDK_TOOLS	?= c:/Espressif/ESP8266_NONOS_SDK/tools
+ESPTOOL		?= esptool.py
+ESPPORT		?= /dev/ttyS3
+ESPBAUD		?= 460800
 
 # BOOT = none
 # BOOT = old - boot_v1.1
@@ -136,7 +137,8 @@ MODULES		= driver math user
 EXTRA_INCDIR    = include include\driver include\math $(SDK_BASE)/../include
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal phy pp net80211 lwip wpa main
+# crypto now required otherwise we get "undefined reference to 'aes_wrap'" error
+LIBS		= c gcc hal phy pp net80211 lwip wpa main crypto
 
 # compiler flags using during compilation of source files
 CFLAGS		= -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
@@ -219,37 +221,11 @@ all: checkdirs $(TARGET_OUT) $(FW_FILE_1) $(FW_FILE_2)
 $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"
 	$(Q) $(LD) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
-	$(vecho) "Run objcopy, please wait..."
-	$(Q) $(OBJCOPY) --only-section .text -O binary $@ eagle.app.v6.text.bin
-	$(Q) $(OBJCOPY) --only-section .data -O binary $@ eagle.app.v6.data.bin
-	$(Q) $(OBJCOPY) --only-section .rodata -O binary $@ eagle.app.v6.rodata.bin
-	$(Q) $(OBJCOPY) --only-section .irom0.text -O binary $@ eagle.app.v6.irom0text.bin
-	$(vecho) "objcopy done"
-	$(vecho) "Run gen_appbin.exe"
-ifeq ($(app), 0)
-	$(Q) $(SDK_TOOLS)/gen_appbin.exe $@ 0 $(mode) $(freqdiv) $(size)
-	$(Q) mv eagle.app.flash.bin firmware/eagle.flash.bin
-	$(Q) mv eagle.app.v6.irom0text.bin firmware/eagle.irom0text.bin
-	$(Q) rm eagle.app.v6.*
-	$(vecho) "No boot needed."
-	$(vecho) "Generate eagle.flash.bin and eagle.irom0text.bin successully in folder firmware."
-	$(vecho) "eagle.flash.bin-------->0x00000"
-	$(vecho) "eagle.irom0text.bin---->0x40000"
-else
-    ifeq ($(boot), new)
-		$(Q) $(SDK_TOOLS)/gen_appbin.exe $@ 2 $(mode) $(freqdiv) $(size)
-		$(vecho) "Support boot_v1.2 and +"
-    else
-		$(Q) $(SDK_TOOLS)/gen_appbin.exe $@ 1 $(mode) $(freqdiv) $(size)
-		$(vecho) "Support boot_v1.1 and +"
-    endif
-	$(Q) mv eagle.app.flash.bin firmware/upgrade/$(BIN_NAME).bin
-	$(Q) rm eagle.app.v6.*
-	$(vecho) "Generate $(BIN_NAME).bin successully in folder firmware/upgrade."
-	$(vecho) "boot_v1.x.bin------->0x00000"
-	$(vecho) "$(BIN_NAME).bin--->$(addr)"
-endif
-	$(vecho) "Done"
+	
+$(FW_BASE): $(TARGET_OUT)
+	$(vecho) "FW $@"
+	$(Q) mkdir -p $@
+	$(Q) $(ESPTOOL) elf2image $(TARGET_OUT) --output $@/
 
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
@@ -259,10 +235,6 @@ checkdirs: $(BUILD_DIR) $(FW_BASE)
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@
-
-firmware:
-	$(Q) mkdir -p $@
-	$(Q) mkdir -p $@/upgrade
 
 flashonefile: all
 	$(OBJCOPY) --only-section .text -O binary $(TARGET_OUT) eagle.app.v6.text.bin
@@ -296,16 +268,9 @@ ifeq ($(boot), none)
 	$(vecho) "No boot needed."
 endif
 
-flash: all
-ifeq ($(app), 0) 
-	$(ESPTOOL) -p $(ESPPORT) -b 256000 write_flash 0x00000 firmware/eagle.flash.bin 0x40000 firmware/eagle.irom0text.bin
-else
-ifeq ($(boot), none)
-	$(ESPTOOL) -p $(ESPPORT) -b 256000 write_flash 0x00000 firmware/eagle.flash.bin 0x40000 firmware/eagle.irom0text.bin
-else
-	$(ESPTOOL) -p $(ESPPORT) -b 256000 write_flash $(addr) firmware/upgrade/$(BIN_NAME).bin
-endif
-endif
+flash: $(TARGET_OUT) $(FW_BASE)
+
+	$(Q) $(ESPTOOL) --port $(ESPPORT) --baud $(ESPBAUD) write_flash 0x00000 $(FW_BASE)/0x00000.bin 0x40000 $(FW_BASE)/0x40000.bin
 
 flashinit:
 	$(vecho) "Flash init data default and blank data."

@@ -46,7 +46,7 @@ time_t last24h_off_time = 1;
 ICACHE_FLASH_ATTR static void updateScreen(void)
 {
 	REG_SET_BIT(0x3ff00014, BIT(0));
-	os_update_cpu_frequency(160);
+	system_update_cpu_freq(160);
 
 	target_room_temperature += 0.1;
 	if (target_room_temperature > max_target_temp)
@@ -62,7 +62,7 @@ int16_t previous[VERTEX_COUNT][3];
 ICACHE_FLASH_ATTR static void updateScreen(void)
 {
 	REG_SET_BIT(0x3ff00014, BIT(0));
-	os_update_cpu_frequency(160);
+	system_update_cpu_freq(160);
 	cube_calculate(current, degree, 0, 0, scale, 0, 0, 0);
 	degree += 4;
 	if (degree > 180.0) degree -= 360.0;

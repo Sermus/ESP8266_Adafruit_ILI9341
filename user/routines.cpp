@@ -5,9 +5,9 @@
 extern "C"
 {
 #include <osapi.h>
-   void *pvPortMalloc( size_t xWantedSize );
-   void vPortFree( void *pv );
-   void *pvPortZalloc(size_t size);
+	void *pvPortMalloc( size_t xWantedSize, const char *s, int i);
+	void vPortFree( void *pv, const char *s, int i );
+	void *pvPortZalloc(size_t size, const char *s, int i);
 }
 
 
