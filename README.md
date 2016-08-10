@@ -32,7 +32,7 @@ The code uses hardware HSPI with hardware controlled CS, so the wiring shall be 
 
 ILI9341 pin -->	ESP8266 pin
 
-MOSI 	-->	GPIO12
+MOSI 	-->	GPIO13
 
 CLK 	-->	GPIO14
 
