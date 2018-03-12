@@ -580,8 +580,8 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint
 #endif
 #ifdef LOAD_FONT7
 		if (size==7) len += *(widtbl_f7s+ascii-32)+2;
-		*pointer++;
 #endif
+		*pointer++;
 	}
 
 	int poX = dX - len/2;
